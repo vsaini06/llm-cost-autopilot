@@ -27,7 +27,7 @@ TEST_PROMPTS = [
     "Write a haiku about software debugging.",
 ]
 
-MODEL_KEYS = ["gpt-4o", "gpt-4o-mini", "llama3.2"]
+MODEL_KEYS = ["gpt-4o", "gpt-4o-mini", "llama3.2"] #anthropic models: {"claude-sonnet", "claude-haiku"}
 
 
 async def test_model(model_key: str, prompt: str, prompt_idx: int):
