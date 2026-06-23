@@ -4,6 +4,8 @@ import yaml
 from fastapi import BackgroundTasks
 from fastapi import Request
 from verifier import verify_and_escalate
+import hashlib
+from db.database import log_request
 
 sys.path.insert(0, os.path.dirname(__file__))
 
@@ -106,6 +108,26 @@ async def handle_completion(req: CompletionRequest, background_tasks: Background
             tier,
             response.cost,
         )
+
+    prompt_hash = hashlib.sha256(req.prompt.encode()).hexdigest()
+    await log_request({
+        "prompt_hash": prompt_hash,
+        "prompt_preview": req.prompt[:100],
+        "complexity_tier": tier,
+        "classifier_confidence": confidence,
+        "model_used": model_key,
+        "tokens_in": response.tokens_in,
+        "tokens_out": response.tokens_out,
+        "cost": response.cost,
+        "cost_if_gpt4o": cost_if_gpt4o,
+        "latency_ms": response.latency_ms,
+        "quality_score": None,
+        "escalated": 0,
+        "escalation_model": None,
+        "escalation_cost_delta": 0.0,
+        "verified": 0,
+    })
+
     return CompletionResponse(
         answer=response.output_text,
         model_used=model_key,
@@ -137,12 +159,8 @@ def list_models() -> list[dict]:
 
 
 async def get_stats() -> dict:
-    return {
-        "message": "Stats will be available once SQLite logging is implemented (Day 5)",
-        "total_requests": 0,
-        "total_cost": 0.0,
-        "total_saved": 0.0,
-    }
+    from db.database import get_stats as db_get_stats
+    return await db_get_stats()
 
 
 def update_routing_config(new_config: dict) -> dict:

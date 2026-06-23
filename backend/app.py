@@ -1,26 +1,19 @@
 import os
 import sys
 from contextlib import asynccontextmanager
-from fastapi import BackgroundTasks
 
 sys.path.insert(0, os.path.dirname(__file__))
 
 from dotenv import load_dotenv
 load_dotenv()
 
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, Request, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from router import (
-    handle_completion,
-    list_models,
-    get_stats,
-    update_routing_config,
-    CompletionRequest,
-)
+from router import handle_completion, list_models, update_routing_config, CompletionRequest
 from providers import get_provider
-from models.registry import MODEL_REGISTRY
+from db.database import init_db, get_stats
 
 
 ROUTER_API_KEY = os.getenv("ROUTER_API_KEY", "")
@@ -36,14 +29,16 @@ async def lifespan(app: FastAPI):
             print(f"  {provider_name}: {'OK' if healthy else 'NOT CONFIGURED'}")
         except Exception as e:
             print(f"  {provider_name}: ERROR - {e}")
+    await init_db()
+    print("  database: OK")
     yield
-    print("Shutting down LLM Cost Autopilot...")
+    print("Shutting down...")
 
 
 app = FastAPI(
     title="LLM Cost Autopilot",
     description="Intelligent LLM routing layer that minimizes cost while maintaining quality",
-    version="0.3.0",
+    version="0.5.0",
     lifespan=lifespan,
 )
 
@@ -59,12 +54,10 @@ app.add_middleware(
 async def auth_middleware(request: Request, call_next):
     if request.url.path in ["/health", "/docs", "/openapi.json", "/redoc"]:
         return await call_next(request)
-
     if ROUTER_API_KEY:
         provided_key = request.headers.get("X-API-Key", "")
         if provided_key != ROUTER_API_KEY:
             return JSONResponse(status_code=401, content={"detail": "Invalid or missing API key"})
-
     return await call_next(request)
 
 

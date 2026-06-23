@@ -1,6 +1,8 @@
 import os
 import sys
 import json
+import hashlib
+import yaml
 
 sys.path.insert(0, os.path.dirname(__file__))
 
@@ -8,6 +10,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from providers.openai_provider import OpenAIProvider
+from db.database import update_verification
 
 JUDGE_MODEL_ID = "gpt-4o"
 MIN_ACCEPTABLE_SCORE = 3.5
@@ -77,15 +80,8 @@ async def verify_and_escalate(
     original_tier: int,
     original_cost: float,
 ) -> dict:
-    """
-    Full verification pipeline:
-    1. Judge the original response
-    2. If score < threshold, escalate to next tier
-    3. Return verification result with escalation info
-    """
     from providers import send_request
     from models.registry import MODEL_REGISTRY
-    import yaml
 
     routing_config_path = os.path.join(os.path.dirname(__file__), "models", "routing_config.yaml")
     with open(routing_config_path) as f:
@@ -94,10 +90,11 @@ async def verify_and_escalate(
     quality_config = config.get("quality", {})
     min_score = quality_config.get("min_acceptable_score", MIN_ACCEPTABLE_SCORE)
 
-
     judgment = await judge_response(prompt, original_response_text)
     score = judgment["score"]
+
     print(f"[VERIFIER] model={original_model_key} tier={original_tier} score={score} reasoning={judgment['reasoning']}")
+
     result = {
         "original_model": original_model_key,
         "original_tier": original_tier,
@@ -108,7 +105,6 @@ async def verify_and_escalate(
         "escalation_cost": 0.0,
         "cost_delta": 0.0,
     }
-
 
     if score is not None and score < min_score and original_tier < 3:
         next_tier = original_tier + 1
@@ -126,5 +122,14 @@ async def verify_and_escalate(
             result["escalation_model"] = escalation_model
             result["escalation_cost"] = escalated_response.cost
             result["cost_delta"] = escalated_response.cost - original_cost
+
+    prompt_hash = hashlib.sha256(prompt.encode()).hexdigest()
+    await update_verification(
+        prompt_hash=prompt_hash,
+        quality_score=score,
+        escalated=result["escalated"],
+        escalation_model=result.get("escalation_model"),
+        escalation_cost_delta=result.get("cost_delta", 0.0),
+    )
 
     return result
