@@ -1,6 +1,7 @@
 import os
 import sys
 from contextlib import asynccontextmanager
+from fastapi import BackgroundTasks
 
 sys.path.insert(0, os.path.dirname(__file__))
 
@@ -80,8 +81,8 @@ async def health():
 
 
 @app.post("/v1/completions")
-async def completions(req: CompletionRequest):
-    return await handle_completion(req)
+async def completions(req: CompletionRequest, background_tasks: BackgroundTasks):
+    return await handle_completion(req, background_tasks)
 
 
 @app.get("/v1/models")

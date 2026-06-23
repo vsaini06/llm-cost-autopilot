@@ -145,6 +145,7 @@ python test_day1.py
 - [x] Step1: Provider abstraction + model registry
 - [x] Step2: Complexity classifier
 - [x] Step 3: FastAPI router
+- [x] Step 4: Async quality verifier
 
 ---
 

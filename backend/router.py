@@ -1,6 +1,9 @@
 import os
 import sys
 import yaml
+from fastapi import BackgroundTasks
+from fastapi import Request
+from verifier import verify_and_escalate
 
 sys.path.insert(0, os.path.dirname(__file__))
 
@@ -48,7 +51,7 @@ def save_routing_config(new_config: dict) -> None:
         yaml.safe_dump(new_config, f, default_flow_style=False, sort_keys=False)
 
 
-async def handle_completion(req: CompletionRequest) -> CompletionResponse:
+async def handle_completion(req: CompletionRequest, background_tasks: BackgroundTasks = None) -> CompletionResponse:
     config = load_routing_config()
 
     # ---Step 1---
@@ -92,8 +95,17 @@ async def handle_completion(req: CompletionRequest) -> CompletionResponse:
 
     routing_reason = tier_config.get("description", "")
     if escalated_for_confidence:
-        routing_reason += f" (low classifier confidence {confidence:.2f} — escalated one tier)"
+        routing_reason += f" (low classifier confidence {confidence:.2f} - escalated one tier)"
 
+    if background_tasks is not None:
+        background_tasks.add_task(
+            verify_and_escalate,
+            req.prompt,
+            response.output_text,
+            model_key,
+            tier,
+            response.cost,
+        )
     return CompletionResponse(
         answer=response.output_text,
         model_used=model_key,
