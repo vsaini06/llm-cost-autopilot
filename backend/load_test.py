@@ -1,5 +1,5 @@
 """
-Day 7 — 500+ prompt load test.
+500+ prompt load test.
 Run from backend/ with: python load_test.py
 Fires prompts at the live FastAPI server and prints final cost savings report.
 """
@@ -581,7 +581,6 @@ async def run_load_test():
                   f"Tier 2: [bold]{sum(1 for _, t in PROMPTS if t == 2)}[/bold] | "
                   f"Tier 3: [bold]{sum(1 for _, t in PROMPTS if t == 3)}[/bold]\n")
 
-    # Run in batches to avoid overwhelming the server
     BATCH_SIZE = 10
     all_results = []
 
@@ -604,7 +603,6 @@ async def run_load_test():
 
     console.print("\n")
 
-    # Results
     successful = [r for r in all_results if r.get("success")]
     failed = [r for r in all_results if not r.get("success")]
 
@@ -618,7 +616,6 @@ async def run_load_test():
         if r.get("actual_tier") == r.get("expected_tier")
     ) / len(successful) * 100 if successful else 0
 
-    # Summary table
     summary = Table(title="Load Test Results", show_lines=True)
     summary.add_column("Metric", style="cyan")
     summary.add_column("Value", style="green")
@@ -634,7 +631,6 @@ async def run_load_test():
 
     console.print(summary)
 
-    # Model distribution
     model_counts = {}
     for r in successful:
         m = r.get("model_used", "unknown")
@@ -651,7 +647,6 @@ async def run_load_test():
 
     console.print(model_table)
 
-    # Save results to JSON
     results_path = os.path.join(os.path.dirname(__file__), "data", "load_test_results.json")
     with open(results_path, "w") as f:
         json.dump({

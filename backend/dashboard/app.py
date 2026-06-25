@@ -20,10 +20,6 @@ st.set_page_config(
 )
 
 
-# ---------------------------------------------------------------------------
-# Data loading
-# ---------------------------------------------------------------------------
-
 def run_async(coro):
     try:
         loop = asyncio.get_event_loop()
@@ -76,10 +72,6 @@ def load_data():
     return stats, all_requests, recent
 
 
-# ---------------------------------------------------------------------------
-# Sidebar
-# ---------------------------------------------------------------------------
-
 st.sidebar.title("LLM Cost Autopilot")
 st.sidebar.markdown("Intelligent LLM routing — minimize cost, maintain quality")
 st.sidebar.divider()
@@ -99,9 +91,6 @@ st.sidebar.divider()
 if st.sidebar.button("Refresh Now"):
     st.rerun()
 
-# ---------------------------------------------------------------------------
-# Load data
-# ---------------------------------------------------------------------------
 
 stats, all_requests, recent_requests = load_data()
 df = pd.DataFrame(all_requests) if all_requests else pd.DataFrame()
@@ -115,10 +104,6 @@ total_requests = stats["total_requests"]
 total_escalations = stats["total_escalations"]
 escalation_rate = (total_escalations / total_requests * 100) if total_requests > 0 else 0.0
 
-
-# ---------------------------------------------------------------------------
-# PAGE 1 — Overview
-# ---------------------------------------------------------------------------
 
 if page == "Overview":
     st.title("Overview")
@@ -170,10 +155,6 @@ if page == "Overview":
         st.info("No requests yet. Send some prompts via the API to see data here.")
 
 
-# ---------------------------------------------------------------------------
-# PAGE 2 — Routing
-# ---------------------------------------------------------------------------
-
 elif page == "Routing":
     st.title("Routing")
     st.caption("How requests are being distributed across models and tiers")
@@ -218,10 +199,6 @@ elif page == "Routing":
     else:
         st.info("No requests yet.")
 
-
-# ---------------------------------------------------------------------------
-# PAGE 3 — Quality
-# ---------------------------------------------------------------------------
 
 elif page == "Quality":
     st.title("Quality")
@@ -277,11 +254,6 @@ elif page == "Quality":
             st.success("No escalations — all models performing above threshold.")
     else:
         st.info("No requests yet.")
-
-
-# ---------------------------------------------------------------------------
-# PAGE 4 — Config
-# ---------------------------------------------------------------------------
 
 elif page == "Config":
     st.title("Config")

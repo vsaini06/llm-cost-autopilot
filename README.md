@@ -4,7 +4,7 @@ An intelligent LLM routing layer that sits in front of multiple providers, analy
 
 **Baseline result: 66% cost reduction on 30-request load test vs all-GPT-4o routing.**
 
-**Final result: 62.3% cost reduction on 513 real requests — $2.07 saved vs all-GPT-4o routing.**
+**Final result: 62.3% cost reduction on 513 real requests; $2.07 saved vs all-GPT-4o routing.**
 
 ## Final Load Test Results (513 prompts)
 
