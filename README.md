@@ -4,6 +4,27 @@ An intelligent LLM routing layer that sits in front of multiple providers, analy
 
 **Baseline result: 66% cost reduction on 30-request load test vs all-GPT-4o routing.**
 
+**Final result: 62.3% cost reduction on 513 real requests — $2.07 saved vs all-GPT-4o routing.**
+
+## Final Load Test Results (513 prompts)
+
+| Metric | Value |
+|--------|-------|
+| Total requests | 513 |
+| Actual cost | $1.2531 |
+| Hypothetical all-GPT-4o cost | $3.3277 |
+| Total saved | $2.0746 |
+| Cost reduction | 62.3% |
+| Tier classification accuracy | 77.2% |
+| Failed requests | 0 |
+
+### Model Distribution
+| Model | Requests | % of Traffic |
+|-------|----------|-------------|
+| GPT-4o Mini | 212 | 41.3% |
+| Llama 3.2 (Local) | 145 | 28.3% |
+| GPT-4o | 99 | 19.3% |
+| Claude Sonnet | 57 | 11.1% |
 ---
 
 ## What it does
@@ -148,6 +169,7 @@ python test_day1.py
 - [x] Step 4: Async quality verifier
 - [x] Step 5: SQLite logging + cost tracking
 - [x] Step 6: Streamlit dashboard
+- [x] Step 7: Docker + final eval
 
 ---
 

@@ -1,0 +1,16 @@
+{
+  "total_prompts": 513,
+  "successful": 513,
+  "failed": 0,
+  "total_cost": 1.253075,
+  "total_hypothetical": 3.327655,
+  "total_saved": 2.07458,
+  "cost_reduction_pct": 62.34,
+  "tier_accuracy_pct": 77.19,
+  "model_distribution": {
+    "llama3.2": 145,
+    "gpt-4o-mini": 212,
+    "gpt-4o": 99,
+    "claude-sonnet": 57
+  }
+}
